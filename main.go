@@ -1,40 +1,52 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/simultechnology/myproglog/internal/server"
+	"log"
 	"strings"
 )
 
 func main() {
 	fmt.Println("start!")
 
-	log := server.NewLog()
+	myLog := server.NewLog()
 
-	record := server.Record{
-		Value: []byte("log..."),
+	jsonStr := `{"record": {"value": "ishi"}}`
+	// strings.NewReaderを使用してio.Readerを作成
+	reader := strings.NewReader(jsonStr)
+
+	var req server.ProduceRequest
+	err := json.NewDecoder(reader).Decode(&req)
+	if err != nil {
+		panic(err) // エラーハンドリングは実際の要件に応じて適切に行ってください
 	}
-	_, err := log.Append(record)
+
+	_, err = myLog.Append(req.Record)
 	if err != nil {
 		return
 	}
-	message, err := log.AppendMessage("simul")
+	message, err := myLog.AppendMessage("simul")
 	if err != nil {
 		return
 	}
 	fmt.Println(message)
 
-	text := "Now we know AVL trees offer O(log n) search performance"
+	text := "Now we know AVL trees offer O(myLog n) search performance"
 	words := strings.Split(text, " ")
 	for _, word := range words {
-		log.AppendMessage(word)
+		myLog.AppendMessage(word)
 	}
 
-	fmt.Printf("%v\n", log)
+	fmt.Printf("%v\n", myLog)
 
-	content, err := log.Read(5)
+	content, err := myLog.Read(5)
 	if err != nil {
 		fmt.Print(err)
 	}
 	fmt.Printf("%v", string(content.Value))
+
+	srv := server.NewHTTPServer(":58888", myLog)
+	log.Fatal(srv.ListenAndServe())
 }
