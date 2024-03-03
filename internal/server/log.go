@@ -24,7 +24,7 @@ func (c *Log) Append(record Record) (uint64, error) {
 
 func (c *Log) AppendMessage(content string) (uint64, error) {
 	record := Record{
-		Value: []byte(content),
+		Value: content,
 	}
 	return c.Append(record)
 }
@@ -39,7 +39,7 @@ func (c *Log) Read(offset uint64) (Record, error) {
 }
 
 type Record struct {
-	Value  []byte `json:"value"`
+	Value  string `json:"value"`
 	Offset uint64 `json:"offset"`
 }
 
